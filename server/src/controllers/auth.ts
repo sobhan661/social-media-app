@@ -30,9 +30,9 @@ export async function signup(req: Request, res: Response, next: NextFunction) {
         .json({ error: 'Password length should be between 8 and 64' });
     }
 
-    if (/[ `~!@#$%^&*()-=+\[\]{};:'",<>/?\\|]/.test(username)) {
+    if (!/^[a-zA-Z0-9._]+$/.test(username)) {
       return res.status(400).json({
-        error: 'User name can only contain a-z, A-Z, numbers and (., _)',
+        error: 'Username can only contain a-z, A-Z, numbers and (., _)',
       });
     }
 
