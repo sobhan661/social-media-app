@@ -7,6 +7,7 @@ const config = {
   databaseURL: process.env.DATABASE_URL,
   saltRounds: Number(process.env.SALT_ROUNDS)!,
   port: process.env.PORT,
+  jwtSecret: process.env.JWT_SECRET!,
 };
 
 export default config;
