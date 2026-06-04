@@ -5,6 +5,7 @@ import bcrypt from 'bcrypt';
 import db from '../db';
 import { users } from '../db/schemas/users';
 import config from '../config/config';
+import { generateToken } from '../utils/generateToken';
 
 export async function signup(req: Request, res: Response, next: NextFunction) {
   try {
@@ -44,9 +45,21 @@ export async function signup(req: Request, res: Response, next: NextFunction) {
     }
 
     const hashPassword = await bcrypt.hash(password, config.saltRounds);
-    await db.insert(users).values({ username, password: hashPassword });
+    const [newUser] = await db
+      .insert(users)
+      .values({ username, password: hashPassword })
+      .returning();
 
-    return res.status(201).json({ message: 'Account Created Successfully' });
+    const getLoginTime = new Date().toISOString();
+    const token = generateToken({
+      userId: newUser?.id!,
+      username: newUser?.username!,
+      loginTime: getLoginTime,
+    });
+
+    return res
+      .status(201)
+      .json({ message: 'Account Created Successfully', token });
   } catch (err) {
     next(err);
   }

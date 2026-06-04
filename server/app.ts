@@ -11,7 +11,7 @@ app.use(express.json());
 app.use(checkBody);
 
 // JWT
-app.use(jwt);
+app.use(jwt());
 
 app.use('/', authRouter);
 
