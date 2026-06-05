@@ -1,7 +1,9 @@
 import { Router } from 'express';
 
-import { signup } from '../controllers/auth';
+import { signup, login } from '../controllers/auth';
+import { signupLimiter, loginLimiter } from '../config/authRateLimit';
 
 export const authRouter = Router();
 
-authRouter.post('/signup', signup);
+authRouter.post('/signup', signupLimiter, signup);
+authRouter.post('/login', loginLimiter, login);
