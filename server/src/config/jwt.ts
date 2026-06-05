@@ -6,7 +6,7 @@ function jwt() {
   return expressjwt({
     secret: config.jwtSecret,
     algorithms: ['HS256'],
-  }).unless({ path: ['/signup'] });
+  }).unless({ path: ['/signup', '/login'] });
 }
 
 export default jwt;

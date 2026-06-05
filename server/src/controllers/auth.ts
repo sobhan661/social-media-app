@@ -13,7 +13,7 @@ export async function signup(req: Request, res: Response, next: NextFunction) {
     if (!username || !password) {
       return res
         .status(400)
-        .json({ error: 'Neither username or password fields cannot be empty' });
+        .json({ error: 'Username and password are required' });
     }
     if (typeof username !== 'string' || typeof password !== 'string') {
       return res.status(400).json({ error: 'Bad Request' });
@@ -50,16 +50,56 @@ export async function signup(req: Request, res: Response, next: NextFunction) {
       .values({ username, password: hashPassword })
       .returning();
 
-    const getLoginTime = new Date().toISOString();
+    const loginTime = new Date().toISOString();
     const token = generateToken({
       userId: newUser?.id!,
       username: newUser?.username!,
-      loginTime: getLoginTime,
+      loginTime,
     });
 
     return res
       .status(201)
       .json({ message: 'Account Created Successfully', token });
+  } catch (err) {
+    next(err);
+  }
+}
+
+export async function login(req: Request, res: Response, next: NextFunction) {
+  try {
+    let { username, password } = req.body;
+    if (!username || !password) {
+      return res
+        .status(400)
+        .json({ error: 'Username and password are required' });
+    }
+    if (typeof username !== 'string' || typeof password !== 'string') {
+      return res.status(400).json({ error: 'Bad Request' });
+    }
+
+    username = username.trim().toLowerCase();
+    const [user] = await db
+      .select()
+      .from(users)
+      .where(eq(users.username, username))
+      .limit(1);
+    if (!user) {
+      return res.status(401).json({ error: 'Username or password is wrong' });
+    }
+
+    const isValid = await bcrypt.compare(password, user.password);
+    if (!isValid) {
+      return res.status(401).json({ error: 'Username or password is wrong' });
+    }
+
+    const loginTime = new Date().toISOString();
+    const token = generateToken({
+      userId: user.id,
+      username,
+      loginTime,
+    });
+
+    return res.status(200).json({ message: 'Logged In', token });
   } catch (err) {
     next(err);
   }
