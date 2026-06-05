@@ -57,9 +57,14 @@ export async function signup(req: Request, res: Response, next: NextFunction) {
       loginTime,
     });
 
-    return res
-      .status(201)
-      .json({ message: 'Account Created Successfully', token });
+    res.cookie('token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 1000 * 60 * 60 * 24, // 1 day
+    });
+
+    return res.status(201).json({ message: 'Account Created Successfully' });
   } catch (err) {
     next(err);
   }
@@ -99,7 +104,14 @@ export async function login(req: Request, res: Response, next: NextFunction) {
       loginTime,
     });
 
-    return res.status(200).json({ message: 'Logged In', token });
+    res.cookie('token', token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 1000 * 60 * 60 * 24, // 1 day
+    });
+
+    return res.status(200).json({ message: 'Logged In' });
   } catch (err) {
     next(err);
   }
